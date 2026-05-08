@@ -64,12 +64,14 @@ tank-war/
 
 ## 部署
 
-### Render
+### Railway
 
-1. Build Command: `npm install`
-2. Start Command: `npm start`
-3. 监听端口：`process.env.PORT`（默认 8080）
+1. 将代码推送到 GitHub
+2. 在 [Railway](https://railway.com) 中点击 **New Project → Deploy from GitHub Repo**
+3. 选择仓库 `jiaheskyground/tank-war`
+4. Railway 会自动检测 Node.js 项目并部署
+5. 无需额外配置 — `npm start` 和 `PORT` 环境变量已就绪
 
 ### 环境变量
 
-- `PORT` — 服务端口（默认 8080）
+- `PORT` — Railway 自动设置，服务端默认 8080

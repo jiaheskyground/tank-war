@@ -16,22 +16,35 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100dvh;
+  width: 100dvw;
   overflow: hidden;
   font-family: 'Press Start 2P', monospace;
   color: #fff;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* ---------- Game Container ---------- */
+/* ---------- Game Container (responsive) ---------- */
 #game-container {
+  --game-w: 800;
+  --game-h: 640;
   position: relative;
-  width: 800px;
-  height: 640px;
+  width: min(
+    calc(var(--game-w) * 1px),
+    calc(100dvw - env(safe-area-inset-left) - env(safe-area-inset-right)),
+    calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * var(--game-w) / var(--game-h))
+  );
+  aspect-ratio: var(--game-w) / var(--game-h);
   border: 4px solid #444;
   box-shadow:
     0 0 20px rgba(0, 200, 0, 0.3),
     inset 0 0 20px rgba(0, 0, 0, 0.5);
   background: #111;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #game-canvas {
@@ -371,4 +384,149 @@ body {
   color: #0f0;
   margin-bottom: 32px;
   text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+}
+
+/* ---------- Touch Controls ---------- */
+#touch-controls {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+#touch-controls > * {
+  pointer-events: none;
+}
+
+#joystick-zone {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  display: none;
+}
+
+#joystick-base {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+#joystick-thumb {
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s linear;
+}
+
+#fire-btn {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(224, 32, 32, 0.25);
+  border: 3px solid rgba(224, 32, 32, 0.5);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 2px;
+  transition: background 0.1s;
+}
+
+#fire-btn.active {
+  background: rgba(224, 32, 32, 0.7);
+  border-color: rgba(255, 100, 100, 0.8);
+}
+
+/* ---------- Rotate Device ---------- */
+#rotate-device .rotate-icon {
+  font-size: 64px;
+  color: #ff0;
+  margin-bottom: 20px;
+  animation: rotatePulse 2s ease-in-out infinite;
+}
+
+@keyframes rotatePulse {
+  0%, 100% { transform: rotate(0deg); opacity: 0.5; }
+  50% { transform: rotate(90deg); opacity: 1; }
+}
+
+#rotate-device .rotate-text {
+  font-size: 14px;
+  color: #ff0;
+  letter-spacing: 4px;
+  line-height: 2;
+  text-shadow: 0 0 12px rgba(255, 255, 0, 0.5);
+}
+
+/* ---------- Responsive: show touch controls on mobile ---------- */
+@media (pointer: coarse) {
+  #touch-controls {
+    display: block;
+  }
+}
+
+/* ---------- Mobile font scaling ---------- */
+@media (max-width: 600px) {
+  .game-title { font-size: 24px; letter-spacing: 4px; }
+  .game-subtitle { font-size: 10px; letter-spacing: 6px; }
+  .menu-title { font-size: 18px; letter-spacing: 3px; margin-bottom: 20px; }
+  .arcade-btn { font-size: 10px; padding: 10px 20px; letter-spacing: 2px; }
+  .arcade-btn-small { font-size: 8px; padding: 8px 14px; }
+  .arcade-btn-back { font-size: 7px; padding: 8px 14px; margin-top: 16px; }
+  .arcade-input { font-size: 8px; padding: 8px 12px; width: 140px; }
+  .hud-label { font-size: 7px; }
+  .hud-value { font-size: 13px; }
+  .controls-hint { font-size: 6px; margin-top: 16px; }
+  .room-id-large { font-size: 20px; letter-spacing: 4px; }
+  .room-status { font-size: 9px; }
+  .slot-label, .slot-status { font-size: 7px; }
+  .gameover-title { font-size: 20px; letter-spacing: 4px; }
+  .final-score { font-size: 9px; margin-bottom: 20px; }
+  .pause-title { font-size: 22px; }
+  .pause-hint { font-size: 9px; }
+  .reconnect-msg { font-size: 7px; }
+  .error-msg { font-size: 7px; }
+  .deco-line { width: 40px; }
+  .deco-star { font-size: 14px; }
+  .title-decoration { gap: 8px; margin-bottom: 24px; }
+  .join-section { flex-direction: column; gap: 8px; }
+  #fire-btn {
+    width: 64px; height: 64px;
+    font-size: 8px;
+    bottom: 16px; right: 16px;
+  }
+  #joystick-zone {
+    width: 100px; height: 100px;
+  }
+  #joystick-thumb {
+    width: 36px; height: 36px;
+  }
+  #rotate-device .rotate-text {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .game-title { font-size: 18px; }
+  .arcade-btn { font-size: 8px; padding: 8px 14px; letter-spacing: 1px; }
+  .arcade-input { font-size: 7px; width: 110px; }
+  .menu-title { font-size: 14px; }
+  #fire-btn { width: 52px; height: 52px; font-size: 7px; bottom: 10px; right: 10px; }
+  #joystick-zone { width: 80px; height: 80px; }
+  #joystick-thumb { width: 30px; height: 30px; }
 }

@@ -8,6 +8,7 @@ import {
   ctx, canvas,
 } from './renderer.js';
 import { createMap, getTile } from '/shared/Map.js';
+import { inputManager } from './input-manager.js';
 
 // Online game state
 let network = null;
@@ -18,7 +19,6 @@ let map = null;
 let players = {};   // id → { x, y, dir, alive, invincible, lives, score, moving }
 let bullets = [];
 let particles = [];
-let localKeys = {};
 let shakeTimer = 0;
 let animFrameId = null;
 let snapshotBuffer = [];
@@ -112,6 +112,8 @@ export function startOnline(wsUrl) {
     showReconnecting(msg.attempt);
   });
 
+  setupVisibilityHandler();
+
   return network.connect();
 }
 
@@ -136,6 +138,7 @@ export function leaveRoom() {
 }
 
 export function disconnect() {
+  teardownVisibilityHandler();
   if (network) network.disconnect();
   stopOnlineGameLoop();
 }
@@ -164,17 +167,17 @@ function processInput() {
   if (gameState !== 'playing' && gameState !== 'countdown') return;
   if (!network || !network.connected) return;
 
+  const input = inputManager.getInput();
+
   let dx = 0, dy = 0;
   let newDir = null;
 
-  if (localKeys['w'] || localKeys['W'] || localKeys['ArrowUp'])    { dy = -2.5; newDir = DIR.UP; }
-  else if (localKeys['s'] || localKeys['S'] || localKeys['ArrowDown']) { dy = 2.5; newDir = DIR.DOWN; }
-  else if (localKeys['a'] || localKeys['A'] || localKeys['ArrowLeft'])  { dx = -2.5; newDir = DIR.LEFT; }
-  else if (localKeys['d'] || localKeys['D'] || localKeys['ArrowRight']) { dx = 2.5; newDir = DIR.RIGHT; }
+  if (input.up)    { dy = -2.5; newDir = DIR.UP; }
+  else if (input.down)  { dy = 2.5; newDir = DIR.DOWN; }
+  else if (input.left)  { dx = -2.5; newDir = DIR.LEFT; }
+  else if (input.right) { dx = 2.5; newDir = DIR.RIGHT; }
 
-  const fire = !!(localKeys[' '] || localKeys['Space']);
-
-  network.sendInput(dx, dy, newDir, fire);
+  network.sendInput(dx, dy, newDir, input.fire);
 }
 
 function processSnapshot(msg) {
@@ -451,16 +454,34 @@ function showReconnecting(attempt) {
   }
 }
 
-export function setupOnlineInput() {
-  window.addEventListener('keydown', e => {
-    localKeys[e.key] = true;
-    localKeys[e.code] = true;
-    if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
-  });
-  window.addEventListener('keyup', e => {
-    localKeys[e.key] = false;
-    localKeys[e.code] = false;
-  });
+// Page visibility — pause heartbeat when hidden, auto-rejoin on return
+let _visHandler = null;
+
+export function setupVisibilityHandler() {
+  if (_visHandler) {
+    document.removeEventListener('visibilitychange', _visHandler);
+  }
+  _visHandler = () => {
+    if (!network) return;
+    if (document.hidden) {
+      network.pausePing();
+    } else {
+      network.resumePing();
+      if (!network.connected && network.wasConnected && roomInfo && playerId) {
+        network.connect().then(() => {
+          network.send({ type: 'rejoin_room', roomId: roomInfo.id, playerId });
+        }).catch(() => {});
+      }
+    }
+  };
+  document.addEventListener('visibilitychange', _visHandler);
+}
+
+export function teardownVisibilityHandler() {
+  if (_visHandler) {
+    document.removeEventListener('visibilitychange', _visHandler);
+    _visHandler = null;
+  }
 }
 
 export function getRoomId() { return roomInfo ? roomInfo.id : null; }

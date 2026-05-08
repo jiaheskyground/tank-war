@@ -1,5 +1,7 @@
 import { startSinglePlayer, stopSinglePlayer, resumeSinglePlayer, isPaused, getGameState, getScore, getPlayerLives, getEnemyCount, getLastResult } from './singleplayer.js';
-import { startOnline, createRoom, joinRoom, markReady, playAgain, leaveRoom, disconnect, setupOnlineInput, getRoomId, getPlayerId, sendRejoin } from './online.js';
+import { startOnline, createRoom, joinRoom, markReady, playAgain, leaveRoom, disconnect, getRoomId, getPlayerId, sendRejoin } from './online.js';
+import { inputManager } from './input-manager.js';
+import { resizeCanvas } from './renderer.js';
 
 // UI State
 let currentMode = 'menu'; // menu | singleplayer | online
@@ -35,6 +37,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
   startScreen.classList.add('hidden');
   canvas.classList.remove('hidden');
   hud.classList.remove('hidden');
+  inputManager.init(gameContainer);
   startSinglePlayer();
   startSPHUDUpdate();
 });
@@ -57,6 +60,7 @@ document.getElementById('restart-btn').addEventListener('click', () => {
   gameoverScreen.classList.add('hidden');
   canvas.classList.remove('hidden');
   hud.classList.remove('hidden');
+  inputManager.init(gameContainer);
   startSinglePlayer();
   startSPHUDUpdate();
 });
@@ -67,7 +71,7 @@ document.getElementById('btn-create-room').addEventListener('click', async () =>
   roomScreen.classList.remove('hidden');
   canvas.classList.remove('hidden');
   hud.classList.remove('hidden');
-  setupOnlineInput();
+  inputManager.init(gameContainer);
 
   const wsUrl = location.origin.replace('http', 'ws');
   await startOnline(wsUrl);
@@ -82,7 +86,7 @@ document.getElementById('btn-join-room').addEventListener('click', () => {
   roomScreen.classList.remove('hidden');
   canvas.classList.remove('hidden');
   hud.classList.remove('hidden');
-  setupOnlineInput();
+  inputManager.init(gameContainer);
 
   const wsUrl = location.origin.replace('http', 'ws');
   startOnline(wsUrl).then(() => {
@@ -161,6 +165,7 @@ function hideAllMenus() {
   pauseScreen.classList.add('hidden');
   gameoverScreen.classList.add('hidden');
   onlineGameoverScreen.classList.add('hidden');
+  document.getElementById('disconnected-screen').classList.add('hidden');
 }
 
 let spHudInterval = null;
@@ -197,11 +202,40 @@ window.addEventListener('DOMContentLoaded', () => {
     roomScreen.classList.remove('hidden');
     canvas.classList.remove('hidden');
     hud.classList.remove('hidden');
-    setupOnlineInput();
+    inputManager.init(gameContainer);
 
     const wsUrl = location.origin.replace('http', 'ws');
     startOnline(wsUrl).then(() => {
       joinRoom(roomId);
     });
   }
+
+  // Canvas DPR resize on load
+  resizeCanvas();
 });
+
+// Responsive: resize canvas on window/orientation change
+let _resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => resizeCanvas(), 150);
+});
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => resizeCanvas(), 300);
+});
+
+// Orientation check — show rotate prompt when portrait on mobile
+const rotateScreen = document.getElementById('rotate-device');
+function checkOrientation() {
+  if (!rotateScreen) return;
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (isCoarse && isPortrait) {
+    rotateScreen.classList.remove('hidden');
+  } else {
+    rotateScreen.classList.add('hidden');
+  }
+}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 300));
+checkOrientation();

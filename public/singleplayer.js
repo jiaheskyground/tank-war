@@ -15,6 +15,7 @@ import {
   spawnExplosion, spawnBrickChunks, updateParticles,
   ctx, canvas,
 } from './renderer.js';
+import { inputManager } from './input-manager.js';
 
 // ---------- Extended Tank for SP (adds drawing support) ----------
 class SPTank extends Tank {
@@ -36,16 +37,16 @@ class PlayerTank extends SPTank {
     this.respawnTimer = 0;
   }
 
-  handleInput(keys, allTanks, map, bullets) {
+  handleInput(input, allTanks, map, bullets) {
     if (!this.alive) return;
 
     let dx = 0, dy = 0;
     let newDir = null;
 
-    if (keys['w'] || keys['W'] || keys['ArrowUp'])    { dy = -this.speed; newDir = DIR.UP; }
-    else if (keys['s'] || keys['S'] || keys['ArrowDown']) { dy = this.speed; newDir = DIR.DOWN; }
-    else if (keys['a'] || keys['A'] || keys['ArrowLeft'])  { dx = -this.speed; newDir = DIR.LEFT; }
-    else if (keys['d'] || keys['D'] || keys['ArrowRight']) { dx = this.speed; newDir = DIR.RIGHT; }
+    if (input.up)    { dy = -this.speed; newDir = DIR.UP; }
+    else if (input.down)  { dy = this.speed; newDir = DIR.DOWN; }
+    else if (input.left)  { dx = -this.speed; newDir = DIR.LEFT; }
+    else if (input.right) { dx = this.speed; newDir = DIR.RIGHT; }
 
     if (newDir) {
       this.dir = newDir;
@@ -54,7 +55,7 @@ class PlayerTank extends SPTank {
       this.moving = false;
     }
 
-    if (keys[' '] || keys['Space']) {
+    if (input.fire) {
       const bullet = this.fire();
       if (bullet) {
         bullet.ownerId = 'player';
@@ -283,7 +284,7 @@ function updateSP() {
 
   // Player
   if (player && player.alive) {
-    player.handleInput(keys, allTanks, map, bullets);
+    player.handleInput(inputManager.getInput(), allTanks, map, bullets);
   }
 
   // Respawn
@@ -403,18 +404,6 @@ function renderSP() {
   if (player && player.alive && player.invincible > 0) drawShield(player.x, player.y);
 }
 
-// Input
-const keys = {};
-window.addEventListener('keydown', e => {
-  keys[e.key] = true;
-  keys[e.code] = true;
-  if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
-});
-window.addEventListener('keyup', e => {
-  keys[e.key] = false;
-  keys[e.code] = false;
-});
-
 let lastResult = null; // { victory: bool, score: number }
 
 export function getGameState() { return gameState; }
@@ -425,4 +414,4 @@ export function getEnemyCount() {
   return Math.max(0, totalEnemies - enemiesSpawned + alive);
 }
 export function getLastResult() { return lastResult; }
-export { keys, player, enemies, map, bullets, particles, shakeTimer };
+export { player, enemies, map, bullets, particles, shakeTimer };

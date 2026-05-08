@@ -13,6 +13,7 @@ export class NetworkClient {
     this.reconnectDelay = 1000;
     this.lastPingTime = 0;
     this.pingInterval = null;
+    this.wasConnected = false;
   }
 
   connect() {
@@ -26,6 +27,7 @@ export class NetworkClient {
 
       this.ws.onopen = () => {
         this.connected = true;
+        this.wasConnected = true;
         this.startPing();
       };
 
@@ -107,6 +109,18 @@ export class NetworkClient {
     }
   }
 
+  pausePing() {
+    this._wasPaused = this.pingInterval !== null;
+    this.stopPing();
+  }
+
+  resumePing() {
+    if (this._wasPaused && this.connected) {
+      this.startPing();
+      this._wasPaused = false;
+    }
+  }
+
   tryReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       const handler = this.messageHandlers.get('disconnected');
@@ -124,6 +138,7 @@ export class NetworkClient {
 
   disconnect() {
     this.stopPing();
+    this.wasConnected = false;
     this.reconnectAttempts = this.maxReconnectAttempts; // Prevent reconnect
     if (this.ws) {
       this.ws.close();

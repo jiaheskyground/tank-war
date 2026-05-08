@@ -2,7 +2,9 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>坦克大战 — Tank War</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -139,6 +141,23 @@
         <h2 class="gameover-title" style="color:#ff0;">DISCONNECTED</h2>
         <p class="final-score">Connection lost...</p>
         <button id="btn-rejoin" class="arcade-btn">REJOIN</button>
+      </div>
+    </div>
+
+    <!-- ============ TOUCH CONTROLS (mobile only) ============ -->
+    <div id="touch-controls">
+      <div id="joystick-zone">
+        <div id="joystick-base"></div>
+        <div id="joystick-thumb"></div>
+      </div>
+      <div id="fire-btn">FIRE</div>
+    </div>
+
+    <!-- ============ ROTATE DEVICE (portrait on mobile) ============ -->
+    <div id="rotate-device" class="overlay hidden">
+      <div class="overlay-content">
+        <div class="rotate-icon">&#8635;</div>
+        <p class="rotate-text">PLEASE ROTATE<br>YOUR DEVICE</p>
       </div>
     </div>
   </div>

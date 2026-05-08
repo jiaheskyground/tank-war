@@ -3,8 +3,15 @@ import { TILE_SIZE, MAP_COLS, MAP_ROWS, TANK_SIZE, BULLET_SIZE, CANVAS_W, CANVAS
 // Canvas setup
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
-canvas.width = CANVAS_W;
-canvas.height = CANVAS_H;
+
+// DPR-aware canvas resize — call on init, resize, orientation change
+// All drawing uses logical coords (0..800, 0..640); setTransform scales to physical pixels.
+export function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(CANVAS_W * dpr);
+  canvas.height = Math.round(CANVAS_H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
 
 // ---------- Sound Engine ----------
 let audioCtx = null;

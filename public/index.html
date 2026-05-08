@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>坦克大战 — Tank War</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container">
+    <!-- 游戏画布 -->
+    <canvas id="game-canvas" class="hidden"></canvas>
+
+    <!-- 顶部 HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-item">
+        <span class="hud-label">SCORE</span>
+        <span id="score-display" class="hud-value">0</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">LIVES</span>
+        <span id="lives-display" class="hud-value">3</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label" id="enemies-label">ENEMIES</span>
+        <span id="enemies-display" class="hud-value">10</span>
+      </div>
+    </div>
+
+    <!-- ============ MAIN MENU ============ -->
+    <div id="main-menu" class="overlay">
+      <div class="overlay-content">
+        <h1 class="game-title">TANK WAR</h1>
+        <p class="game-subtitle">坦 克 大 战</p>
+        <div class="title-decoration">
+          <span class="deco-line"></span>
+          <span class="deco-star">★</span>
+          <span class="deco-line"></span>
+        </div>
+        <div class="menu-buttons">
+          <button id="btn-singleplayer" class="arcade-btn">SINGLE PLAYER</button>
+          <button id="btn-online" class="arcade-btn arcade-btn-red">ONLINE BATTLE</button>
+        </div>
+        <p class="controls-hint">WASD / 方向键 移动 | 空格 射击 | P 暂停</p>
+      </div>
+    </div>
+
+    <!-- ============ ONLINE MENU ============ -->
+    <div id="online-menu" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 class="menu-title">ONLINE BATTLE</h2>
+        <div class="menu-buttons">
+          <button id="btn-create-room" class="arcade-btn">CREATE ROOM</button>
+          <div class="join-section">
+            <input type="text" id="join-room-id" class="arcade-input" placeholder="ROOM ID" maxlength="8">
+            <button id="btn-join-room" class="arcade-btn arcade-btn-small">JOIN</button>
+          </div>
+        </div>
+        <button id="btn-back-menu" class="arcade-btn arcade-btn-back">BACK</button>
+        <p id="error-message" class="error-msg hidden"></p>
+      </div>
+    </div>
+
+    <!-- ============ ROOM SCREEN ============ -->
+    <div id="room-screen" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 class="menu-title">ROOM</h2>
+        <div class="room-info">
+          <p class="room-label">ROOM ID</p>
+          <p id="room-id-display" class="room-id-large">----</p>
+          <button id="btn-copy-link" class="arcade-btn arcade-btn-small">COPY INVITE LINK</button>
+          <p id="copy-confirm" class="copy-confirm hidden">Link Copied!</p>
+        </div>
+        <p id="room-status" class="room-status">WAITING...</p>
+        <div class="player-slots">
+          <div class="player-slot">
+            <span class="slot-label">YOU</span>
+            <span class="slot-status you">● READY</span>
+          </div>
+          <div class="player-slot">
+            <span class="slot-label">OPPONENT</span>
+            <span id="opponent-status" class="slot-status opponent">Waiting...</span>
+          </div>
+        </div>
+        <button id="ready-btn" class="arcade-btn hidden">READY</button>
+        <p id="reconnect-status" class="reconnect-msg hidden"></p>
+        <button id="btn-leave-room" class="arcade-btn arcade-btn-back">LEAVE</button>
+      </div>
+    </div>
+
+    <!-- ============ START SCREEN (SP) ============ -->
+    <div id="start-screen" class="overlay hidden">
+      <div class="overlay-content">
+        <h1 class="game-title">TANK WAR</h1>
+        <p class="game-subtitle">坦 克 大 战</p>
+        <div class="title-decoration">
+          <span class="deco-line"></span>
+          <span class="deco-star">★</span>
+          <span class="deco-line"></span>
+        </div>
+        <button id="start-btn" class="arcade-btn">START GAME</button>
+        <p class="controls-hint">WASD / 方向键 移动 | 空格 射击 | P 暂停</p>
+      </div>
+    </div>
+
+    <!-- ============ PAUSE SCREEN ============ -->
+    <div id="pause-screen" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 class="pause-title">PAUSED</h2>
+        <p class="pause-hint">按 P 键继续</p>
+      </div>
+    </div>
+
+    <!-- ============ GAME OVER (SP) ============ -->
+    <div id="gameover-screen" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 id="gameover-title" class="gameover-title">GAME OVER</h2>
+        <p id="gameover-subtitle" class="gameover-subtitle"></p>
+        <p class="final-score">FINAL SCORE: <span id="final-score">0</span></p>
+        <button id="restart-btn" class="arcade-btn">RESTART</button>
+      </div>
+    </div>
+
+    <!-- ============ ONLINE GAME OVER ============ -->
+    <div id="online-gameover-screen" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 id="online-gameover-title" class="gameover-title">GAME OVER</h2>
+        <p class="final-score">YOUR SCORE: <span id="online-final-score">0</span></p>
+        <div class="menu-buttons">
+          <button id="btn-play-again" class="arcade-btn">PLAY AGAIN</button>
+          <button id="btn-online-back-menu" class="arcade-btn arcade-btn-back">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ DISCONNECTED ============ -->
+    <div id="disconnected-screen" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 class="gameover-title" style="color:#ff0;">DISCONNECTED</h2>
+        <p class="final-score">Connection lost...</p>
+        <button id="btn-rejoin" class="arcade-btn">REJOIN</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="ui.js"></script>
+</body>
+</html>

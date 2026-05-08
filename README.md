@@ -1,61 +1,75 @@
-# Tank War — 网页版坦克大战
+# Tank War — 网页版坦克大战（联机版）
 
-经典 Battle City 风格的网页坦克大战游戏，使用原生 HTML + CSS + JavaScript 开发，无需任何构建工具或 npm 依赖。
+经典 Battle City 风格的网页坦克大战，支持单机和对战联机。
 
 ## 快速开始
 
-直接用浏览器打开 `index.html` 即可运行。
-
 ```bash
-# Linux / macOS
-open index.html
-
-# 或者直接双击 index.html 文件
+npm install
+npm start
 ```
+
+浏览器访问 `http://localhost:8080`
+
+## 联机对战
+
+1. 打开浏览器，点击 **ONLINE BATTLE**
+2. 点击 **CREATE ROOM** 创建房间
+3. 复制邀请链接发给对手（或手动输入房间号）
+4. 双方点击 **READY**
+5. 倒计时结束后开始对战
 
 ## 操作方式
 
 | 操作 | 按键 |
 |------|------|
-| 移动 | W A S D 或 方向键 ↑ ↓ ← → |
+| 移动 | W A S D 或 方向键 |
 | 射击 | 空格键 |
-| 暂停/继续 | P 键 |
-
-## 游戏玩法
-
-- 控制你的坦克消灭所有敌方坦克
-- 砖墙可被子弹摧毁，铁墙不可摧毁
-- 草地可以穿过但会遮挡视野
-- 水域无法进入
-- 被击中会损失生命值，生命耗尽游戏结束
-- 消灭敌人获得分数
-
-## 技术说明
-
-- 所有画面通过 Canvas 绘制，无需外部图片资源
-- 音效使用 Web Audio API 振荡器生成
-- 纯原生实现，零依赖
+| 暂停 | P 键（仅单机模式） |
 
 ## 项目结构
 
 ```
 tank-war/
-├── index.html    # 主页面
-├── style.css     # 样式
-├── game.js       # 游戏逻辑
-├── assets/       # 资源文件（预留）
-└── README.md
-``  直接打开（推荐）
+├── server/           # 服务端（Express + WebSocket）
+│   ├── server.js     # 主进程
+│   ├── room.js       # 房间管理
+│   ├── gameState.js  # 服务端权威游戏逻辑
+│   ├── sync.js       # 快照同步
+│   └── antiCheat.js  # 反作弊校验
+├── public/           # 客户端
+│   ├── index.html    # UI
+│   ├── online.js     # 联机模式
+│   ├── singleplayer.js # 单机模式
+│   ├── renderer.js   # Canvas 渲染 + 音效
+│   ├── network.js    # WebSocket 网络层
+│   └── ui.js         # UI 控制器
+├── shared/           # 共享逻辑
+│   ├── constants.js  # 常量配置
+│   ├── Tank.js       # 坦克
+│   ├── Bullet.js     # 子弹
+│   ├── Collision.js  # 碰撞检测
+│   └── Map.js        # 地图生成
+└── legacy/           # 原始单机版（归档）
+```
 
-  # 直接浏览器打开，无需服务器
-  xdg-open /home/ljh/workspace/tank-war/index.html
+## 技术说明
 
-  或者直接在文件管理器中双击 index.html 即可。这个项目没有跨域请求，不需要 HTTP 服务器。
+- 服务端权威架构，20tps 游戏循环
+- WebSocket 实时通信，10Hz 快照同步
+- 客户端预测 + 远程玩家插值
+- 内置反作弊（速度/射速/瞬移检测）
+- 断线自动重连（5 次指数退避）
+- Canvas 渲染 + Web Audio API 音效
 
-  如果需要 HTTP 服务器
+## 部署
 
-  cd /home/ljh/workspace/tank-war
-  python3 -m http.server 8080
-  # 然后浏览器访问 http://localhost:8080
+### Render
 
-  ▎ 注意：! 前缀可以让命令在会话中执行，例如在对话中输入 ! xdg-open /home/ljh/workspace/tank-war/index.html。`
+1. Build Command: `npm install`
+2. Start Command: `npm start`
+3. 监听端口：`process.env.PORT`（默认 8080）
+
+### 环境变量
+
+- `PORT` — 服务端口（默认 8080）

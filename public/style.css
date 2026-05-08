@@ -1,0 +1,374 @@
+/* ===================================
+   Tank War — Retro Arcade Style v2
+   =================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0a0a0a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace;
+  color: #fff;
+}
+
+/* ---------- Game Container ---------- */
+#game-container {
+  position: relative;
+  width: 800px;
+  height: 640px;
+  border: 4px solid #444;
+  box-shadow:
+    0 0 20px rgba(0, 200, 0, 0.3),
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+  background: #111;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#game-canvas.hidden {
+  display: none;
+}
+
+/* ---------- HUD ---------- */
+#hud {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#hud.hidden {
+  display: none;
+}
+
+.hud-item {
+  text-align: center;
+}
+
+.hud-label {
+  display: block;
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+
+.hud-value {
+  font-size: 18px;
+  color: #0f0;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+}
+
+/* ---------- Overlays ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 100;
+  transition: opacity 0.3s;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-content {
+  text-align: center;
+}
+
+/* ---------- Main Menu ---------- */
+.game-title {
+  font-size: 48px;
+  color: #e02020;
+  text-shadow:
+    0 0 20px rgba(224, 32, 32, 0.8),
+    0 0 40px rgba(224, 32, 32, 0.4),
+    0 4px 0 #600;
+  letter-spacing: 8px;
+  margin-bottom: 8px;
+}
+
+.game-subtitle {
+  font-size: 16px;
+  color: #ccc;
+  letter-spacing: 12px;
+  margin-bottom: 16px;
+}
+
+.title-decoration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.deco-line {
+  display: block;
+  width: 80px;
+  height: 2px;
+  background: #444;
+}
+
+.deco-star {
+  color: #ff0;
+  font-size: 20px;
+  text-shadow: 0 0 10px rgba(255, 255, 0, 0.6);
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.menu-title {
+  font-size: 28px;
+  color: #ff0;
+  text-shadow: 0 0 12px rgba(255, 255, 0, 0.6);
+  letter-spacing: 6px;
+  margin-bottom: 32px;
+}
+
+/* ---------- Arcade Button ---------- */
+.arcade-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px;
+  padding: 14px 36px;
+  border: 3px solid #0f0;
+  background: transparent;
+  color: #0f0;
+  cursor: pointer;
+  letter-spacing: 4px;
+  transition: all 0.15s;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.2);
+}
+
+.arcade-btn:hover {
+  background: #0f0;
+  color: #000;
+  box-shadow: 0 0 24px rgba(0, 255, 0, 0.5);
+}
+
+.arcade-btn:active {
+  transform: scale(0.95);
+}
+
+.arcade-btn-red {
+  border-color: #e02020;
+  color: #e02020;
+  text-shadow: 0 0 8px rgba(224, 32, 32, 0.5);
+  box-shadow: 0 0 12px rgba(224, 32, 32, 0.2);
+}
+
+.arcade-btn-red:hover {
+  background: #e02020;
+  color: #000;
+  box-shadow: 0 0 24px rgba(224, 32, 32, 0.5);
+}
+
+.arcade-btn-back {
+  font-size: 10px;
+  padding: 10px 24px;
+  margin-top: 24px;
+  border-color: #555;
+  color: #888;
+}
+
+.arcade-btn-back:hover {
+  background: #555;
+  color: #000;
+}
+
+.arcade-btn-small {
+  font-size: 11px;
+  padding: 10px 20px;
+}
+
+/* ---------- Arcade Input ---------- */
+.arcade-input {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  padding: 12px 16px;
+  border: 3px solid #0f0;
+  background: transparent;
+  color: #0f0;
+  text-align: center;
+  letter-spacing: 3px;
+  width: 200px;
+  outline: none;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+}
+
+.arcade-input:focus {
+  box-shadow: 0 0 16px rgba(0, 255, 0, 0.3);
+}
+
+.arcade-input::placeholder {
+  color: #333;
+}
+
+.join-section {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ---------- Room Screen ---------- */
+.room-info {
+  margin-bottom: 24px;
+}
+
+.room-label {
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.room-id-large {
+  font-size: 32px;
+  color: #0f0;
+  letter-spacing: 8px;
+  text-shadow: 0 0 16px rgba(0, 255, 0, 0.6);
+  margin-bottom: 16px;
+}
+
+.copy-confirm {
+  font-size: 10px;
+  color: #0f0;
+  margin-top: 8px;
+  animation: blink 0.5s step-end 4;
+}
+
+.room-status {
+  font-size: 12px;
+  color: #ff0;
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+  text-shadow: 0 0 8px rgba(255, 255, 0, 0.5);
+}
+
+.player-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.player-slot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border: 2px solid #333;
+  background: rgba(255,255,255,0.02);
+}
+
+.slot-label {
+  font-size: 10px;
+  color: #888;
+}
+
+.slot-status {
+  font-size: 10px;
+}
+
+.slot-status.you {
+  color: #0f0;
+  text-shadow: 0 0 6px rgba(0, 255, 0, 0.4);
+}
+
+.slot-status.opponent {
+  color: #e44;
+  text-shadow: 0 0 6px rgba(255, 100, 100, 0.4);
+}
+
+.reconnect-msg {
+  font-size: 10px;
+  color: #ff0;
+  margin-top: 12px;
+}
+
+.error-msg {
+  font-size: 10px;
+  color: #e44;
+  margin-top: 12px;
+}
+
+/* ---------- Controls Hint ---------- */
+.controls-hint {
+  margin-top: 24px;
+  font-size: 8px;
+  color: #555;
+  line-height: 1.8;
+  letter-spacing: 1px;
+}
+
+/* ---------- Pause Screen ---------- */
+.pause-title {
+  font-size: 36px;
+  color: #ff0;
+  text-shadow: 0 0 16px rgba(255, 255, 0, 0.6);
+  letter-spacing: 8px;
+  margin-bottom: 20px;
+  animation: blink 1s step-end infinite;
+}
+
+.pause-hint {
+  font-size: 12px;
+  color: #888;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ---------- Game Over Screen ---------- */
+.gameover-title {
+  font-size: 36px;
+  color: #e02020;
+  text-shadow:
+    0 0 16px rgba(224, 32, 32, 0.8),
+    0 4px 0 #600;
+  letter-spacing: 8px;
+  margin-bottom: 8px;
+}
+
+.gameover-subtitle {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 24px;
+}
+
+.final-score {
+  font-size: 12px;
+  color: #0f0;
+  margin-bottom: 32px;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+}

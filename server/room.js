@@ -29,6 +29,7 @@ export function getAllRooms() {
 }
 
 export function addPlayerToRoom(room, playerId, ws) {
+  if (!room) return false;
   if (room.players.size >= 2) return false;
   room.players.set(playerId, {
     id: playerId,
@@ -42,6 +43,7 @@ export function addPlayerToRoom(room, playerId, ws) {
 }
 
 export function removePlayerFromRoom(room, playerId) {
+  if (!room) return;
   room.players.delete(playerId);
   room.lastActivity = Date.now();
   if (room.players.size === 0) {
@@ -50,6 +52,7 @@ export function removePlayerFromRoom(room, playerId) {
 }
 
 export function playerReady(room, playerId) {
+  if (!room) return false;
   const player = room.players.get(playerId);
   if (!player) return false;
   player.ready = true;
@@ -57,6 +60,7 @@ export function playerReady(room, playerId) {
 }
 
 export function allReady(room) {
+  if (!room) return false;
   if (room.players.size < 2) return false;
   for (const [, p] of room.players) {
     if (!p.ready) return false;
@@ -65,6 +69,7 @@ export function allReady(room) {
 }
 
 export function updateHeartbeat(room, playerId) {
+  if (!room) return;
   const player = room.players.get(playerId);
   if (player) {
     player.lastHeartbeat = Date.now();
@@ -72,6 +77,7 @@ export function updateHeartbeat(room, playerId) {
 }
 
 export function checkTimeouts(room) {
+  if (!room) return;
   const now = Date.now();
   for (const [id, player] of room.players) {
     if (now - player.lastHeartbeat > HEARTBEAT_TIMEOUT) {
@@ -81,6 +87,7 @@ export function checkTimeouts(room) {
 }
 
 export function roomToInfo(room) {
+  if (!room) return { id: null, players: [], gameState: 'unknown' };
   const players = [];
   for (const [id, p] of room.players) {
     players.push({

@@ -164,7 +164,10 @@ function handleMessage(ws, playerId, msg) {
     }
 
     case 'ping': {
-      updateHeartbeat(getRoom(info.roomId), playerId);
+      const room = getRoom(info.roomId);
+      if (room) {
+        updateHeartbeat(room, playerId);
+      }
       sendMessage(ws, { type: 'pong', time: msg.time, serverTime: Date.now() });
       break;
     }

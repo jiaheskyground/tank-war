@@ -104,6 +104,9 @@ export class InputManager {
   // ---- Touch backend (Pointer Events) ----
 
   _onPointerDown(e) {
+    // Don't capture pointer events on interactive elements — let buttons/inputs work
+    if (e.target.closest('button, input, a, select, textarea, [role="button"]')) return;
+
     e.preventDefault();
     const rect = this._container.getBoundingClientRect();
     const relX = (e.clientX - rect.left) / rect.width;

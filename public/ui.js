@@ -101,13 +101,23 @@ document.getElementById('btn-back-menu').addEventListener('click', () => {
 
 // ---------- Room Screen ----------
 document.getElementById('btn-copy-link').addEventListener('click', () => {
-  const roomId = document.getElementById('room-id-display').textContent;
+  const roomId = getRoomId() || document.getElementById('room-id-display').textContent;
+  if (!roomId || roomId === '----') return;
   const link = `${location.origin}?room=${roomId}`;
-  navigator.clipboard.writeText(link).then(() => {
-    const el = document.getElementById('copy-confirm');
+
+  const el = document.getElementById('copy-confirm');
+  const showCopied = () => {
     el.classList.remove('hidden');
     setTimeout(() => el.classList.add('hidden'), 2000);
-  }).catch(() => {});
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(showCopied).catch(() => {
+      fallbackCopy(link, showCopied);
+    });
+  } else {
+    fallbackCopy(link, showCopied);
+  }
 });
 
 document.getElementById('ready-btn').addEventListener('click', () => {
@@ -166,6 +176,24 @@ function hideAllMenus() {
   gameoverScreen.classList.add('hidden');
   onlineGameoverScreen.classList.add('hidden');
   document.getElementById('disconnected-screen').classList.add('hidden');
+}
+
+function fallbackCopy(text, onSuccess) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  ta.style.top = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    onSuccess();
+  } catch (e) {
+    // copy failed — ignore
+  }
+  document.body.removeChild(ta);
 }
 
 let spHudInterval = null;

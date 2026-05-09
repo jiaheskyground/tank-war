@@ -478,6 +478,42 @@ body {
   }
 }
 
+/* ---------- Landscape touch layout ---------- */
+#touch-controls.landscape #fire-btn {
+  bottom: max(16px, env(safe-area-inset-bottom));
+  right: max(16px, env(safe-area-inset-right));
+  width: 72px;
+  height: 72px;
+}
+
+#touch-controls.landscape #joystick-zone {
+  /* joystick base anchored bottom-left; JS repositions on touch */
+  width: 110px;
+  height: 110px;
+}
+
+@media (max-width: 600px) {
+  #touch-controls.landscape #fire-btn {
+    width: 56px; height: 56px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    right: max(10px, env(safe-area-inset-right));
+  }
+  #touch-controls.landscape #joystick-zone {
+    width: 90px; height: 90px;
+  }
+}
+
+@media (max-height: 400px) {
+  #touch-controls.landscape #fire-btn {
+    width: 48px; height: 48px;
+    bottom: max(6px, env(safe-area-inset-bottom));
+    right: max(6px, env(safe-area-inset-right));
+  }
+  #touch-controls.landscape #joystick-zone {
+    width: 72px; height: 72px;
+  }
+}
+
 /* ---------- Mobile font scaling ---------- */
 @media (max-width: 600px) {
   .game-title { font-size: 24px; letter-spacing: 4px; }

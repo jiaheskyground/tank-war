@@ -62,6 +62,15 @@ export class InputManager {
     this._updateFireVisual(false);
   }
 
+  // Re-read container bounds — call after orientation/layout changes
+  refresh() {
+    if (!this._container) return;
+    // Update joystick zone and fire button references in case DOM changed
+    this._joyZone = this._container.querySelector('#joystick-zone');
+    this._joyThumb = this._container.querySelector('#joystick-thumb');
+    this._fireBtn = this._container.querySelector('#fire-btn');
+  }
+
   // ---- Main input read ----
 
   getInput() {

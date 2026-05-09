@@ -214,28 +214,69 @@ window.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
 });
 
-// Responsive: resize canvas on window/orientation change
-let _resizeTimer = null;
-window.addEventListener('resize', () => {
-  clearTimeout(_resizeTimer);
-  _resizeTimer = setTimeout(() => resizeCanvas(), 150);
-});
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => resizeCanvas(), 300);
-});
-
-// Orientation check — show rotate prompt when portrait on mobile
+// Orientation & layout — unified handler, no screen.orientation dependency
 const rotateScreen = document.getElementById('rotate-device');
-function checkOrientation() {
-  if (!rotateScreen) return;
-  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
-  const isPortrait = window.innerHeight > window.innerWidth;
-  if (isCoarse && isPortrait) {
-    rotateScreen.classList.remove('hidden');
-  } else {
-    rotateScreen.classList.add('hidden');
+const touchControls = document.getElementById('touch-controls');
+
+let _layoutTimer = null;
+
+function isLandscape() {
+  return window.innerWidth > window.innerHeight;
+}
+
+export function checkOrientation() {
+  const landscape = isLandscape();
+
+  // Rotate overlay
+  if (rotateScreen) {
+    if (landscape) {
+      rotateScreen.classList.add('hidden');
+    } else {
+      rotateScreen.classList.remove('hidden');
+    }
+  }
+
+  // Touch controls layout class
+  if (touchControls) {
+    touchControls.classList.toggle('landscape', landscape);
+  }
+
+  if (landscape) {
+    resizeCanvas();
+    layoutControls();
   }
 }
-window.addEventListener('resize', checkOrientation);
-window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 300));
+
+export function layoutControls() {
+  // Force safe-area CSS re-evaluation
+  document.body.style.padding = '';
+  void document.body.offsetHeight;
+  document.body.style.padding = '';
+
+  // Re-initialize input if game container is visible
+  if (!canvas.classList.contains('hidden') && inputManager._initialized) {
+    inputManager.refresh();
+  }
+}
+
+function scheduleLayout(delay) {
+  clearTimeout(_layoutTimer);
+  _layoutTimer = setTimeout(() => {
+    checkOrientation();
+  }, delay);
+}
+
+window.addEventListener('resize', () => scheduleLayout(100));
+
+window.addEventListener('orientationchange', () => {
+  // orientationchange fires before dimensions are updated
+  scheduleLayout(300);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    scheduleLayout(150);
+  }
+});
+
 checkOrientation();
